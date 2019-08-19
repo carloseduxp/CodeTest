@@ -1,0 +1,74 @@
+﻿@page
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@model CodeChallenge.Pages.IndexModel
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <title>Code Challenge</title>
+    <style>
+        b {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        $(function () {
+            var timerId;
+            $('#btnGo').on('click', function (evt) {
+                var $resultsDiv = $('#results');
+                $resultsDiv.html("");
+
+                var isRandom = $("#rbtnRandom:checked").val();
+                evt.preventDefault();
+                var postCall = function () {
+                    $.post('', $('form').serialize(), function (data) {
+                        if (data) {
+                            if (isRandom) {
+                                $resultsDiv.html(data.joke);
+                            } else {
+                                $(data).each(function (idx, group) {
+                                    var ul = $('<ul/>').html(group.key)
+                                    $(group.value).each(function (idx, joke) {
+                                        var sub_li = $('<li/>').html(joke);
+                                        ul.append(sub_li);
+                                    })
+                                    $resultsDiv.append(ul);
+                                });
+                            }
+                        }
+                    });
+                }
+                if (isRandom) {
+                    postCall();
+                    timerId = setInterval(postCall, 10000);
+                }
+                else {
+                    clearInterval(timerId);
+                    postCall();
+                }
+            });
+        });
+    </script>
+    <form method="POST">
+        <h3>Press 'Go' to start.</h3>
+        <fieldset>
+            <input id="rbtnRandom" type="radio" value="false" asp-for="IsSearch" checked="checked" />Get Random Joke
+            <input id="rbtnSearch" type="radio" value="true" asp-for="IsSearch" />Search Joke
+            <input id="txtSearch" type="text" asp-for="SearchText" />
+            <input id="btnGo" type="button" value="Go" />
+        </fieldset>
+
+    </form>
+    <br />
+    <div id="results">
+    </div>
+</body>
+</html>
